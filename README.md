@@ -6,16 +6,16 @@ Her er lidt information fra kurset
 
 # Azure DevOps Sandbox (Integration-IT) 
 
-Adresse:	https://dev.azure.com/integration-it-teaching/  
-Username: 	teknologiskdevops@adminintegrationit.onmicrosoft.com
-Kodeord:	Teknologisk1234!
+- Adresse:	https://dev.azure.com/integration-it-teaching/  
+- Username: 	teknologiskdevops@adminintegrationit.onmicrosoft.com
+- Kodeord:	Teknologisk1234!
 
 Denne konto bliver lukket 14 dage efter oprettelse, da der så skal MFA på og så kan I ikke bruge denne mere ;)
 
 # Git materiale
 
 I kan finde det Git Repo, som vi endte ud med her:
-
+https://github.com/integration-it-com/teknologiskdevopsoktober
 
 Bemærk: Jeg bruger faktisk GitHub her (næsten det samme som Azure DevOps Repos), da denne Repo er public ;)
 

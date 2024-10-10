@@ -1,0 +1,42 @@
+trigger:
+  - none
+
+variables:
+  - group: Common
+pool:
+  vmImage: ubuntu-latest
+
+stages:
+  - stage: Build
+    jobs:
+      - job: Job_1
+        displayName: "Build and publish artifact"
+        steps:
+          - checkout: self
+          - task: CopyFiles@2
+            inputs:
+              SourceFolder: "$(Build.Repository.LocalPath)"
+              Contents: infrastructure/*'
+              TargetFolder: "$(Build.Repository.LocalPath)/infrastructure/"
+          - task: PublishPipelineArtifact@1
+            inputs:
+              targetPath: "$(Build.Repository.LocalPath)/infrastructure/"
+              artifact: templates
+              publishLocation: "pipeline"
+  - template: deploy.yaml
+    parameters:
+      Environment: test
+      ServiceConnection: "$(sc.test)"
+      AppName: $(appName)
+
+  - template: deploy.yaml
+    parameters:
+      Environment: stage
+      ServiceConnection: "$(sc.prod)"
+      AppName: $(appName)
+
+  - template: deploy.yaml
+    parameters:
+      Environment: prod
+      ServiceConnection: "$(sc.prod)"
+      AppName: $(appName)

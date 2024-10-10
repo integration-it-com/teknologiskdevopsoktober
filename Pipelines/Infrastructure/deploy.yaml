@@ -1,0 +1,33 @@
+parameters:
+  - name: Environment
+    type: string
+  - name: ServiceConnection # This is needed as a parameter. Cannot reference from variable group
+    type: string
+  - name: AppName
+    type: string
+
+stages:
+  - stage: ${{ parameters.Environment }}Release
+    variables:
+      - group: Common
+      - name: resourceGroup
+        value: ${{ parameters.AppName }}-${{ parameters.Environment }}-rg
+    displayName: Release to ${{ parameters.Environment }}
+    jobs:
+      - deployment: ${{ parameters.Environment }}
+        displayName: Deploy to ${{ parameters.Environment }}
+        environment: ${{ parameters.Environment }}
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - task: AzureResourceManagerTemplateDeployment@3
+                  inputs:
+                    connectedServiceName: ${{ parameters.ServiceConnection }}
+                    location: $(location)
+                    resourceGroupName: ${{ variables.resourceGroup }}
+                    csmFile: "$(Pipeline.Workspace)/templates/functionapp.bicep"
+                    overrideParameters: >
+                      -appName ${{ parameters.AppName }}
+                      -env ${{ parameters.Environment}}
+                      -location $(location)

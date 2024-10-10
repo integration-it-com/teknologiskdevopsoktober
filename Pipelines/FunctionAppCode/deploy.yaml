@@ -1,0 +1,31 @@
+parameters:
+  - name: Environment
+    type: string
+  - name: ServiceConnection # This is needed as a parameter. Cannot reference from variable group
+    type: string
+  - name: DependsOn
+    type: string
+
+stages:
+  - stage: Deploy${{ parameters.Environment }}
+    variables:
+      - group: Common
+    displayName: Deploy Function app code to ${{ parameters.Environment }}
+    dependsOn: ${{ parameters.DependsOn }}
+    jobs:
+      - deployment: Deploy${{ parameters.Environment }}
+        displayName: Deploy to ${{ parameters.Environment }}
+        environment: ${{ parameters.Environment }}
+
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - task: AzureFunctionApp@2
+                  displayName: "Publish Function App to Azure"
+                  inputs:
+                    azureSubscription: ${{ parameters.ServiceConnection }}
+                    appType: "functionApp"
+                    appName: "$(appName)-function-app-${{ parameters.Environment }}-func"
+                    package: "$(Pipeline.Workspace)/drop/$(Build.BuildId).zip"
+                    deploymentMethod: "runFromPackage"

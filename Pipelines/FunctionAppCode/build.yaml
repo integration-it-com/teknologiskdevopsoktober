@@ -1,0 +1,61 @@
+trigger:
+  - master
+
+variables:
+  - group: Common
+  - name: directory
+    value: "/Devops"
+  - name: vmImageName
+    value: "ubuntu-latest"
+
+stages:
+  - stage: Build
+    variables:
+      - name: workingDirectory
+        value: "$(System.DefaultWorkingDirectory)$(directory)"
+    displayName: Build stage
+
+    jobs:
+      - job: Build
+        displayName: Build
+        pool:
+          vmImage: $(vmImageName)
+
+        steps:
+          - script: echo $(workingDirectory)
+          - task: DotNetCoreCLI@2
+            displayName: Build
+            inputs:
+              command: "build"
+              projects: |
+                $(workingDirectory)/*.csproj
+              arguments: --output $(System.DefaultWorkingDirectory)/publish_output --configuration Release
+
+          - task: ArchiveFiles@2
+            displayName: "Archive files"
+            inputs:
+              rootFolderOrFile: "$(System.DefaultWorkingDirectory)/publish_output"
+              includeRootFolder: false
+              archiveType: zip
+              archiveFile: $(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip
+              replaceExistingArchive: true
+
+          - publish: $(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip
+            artifact: drop
+  - template: deploy.yaml
+    parameters:
+      Environment: test
+      ServiceConnection: $(sc.test)
+      DependsOn: Build
+
+  - template: deploy.yaml
+    parameters:
+      Environment: stage
+      ServiceConnection: $(sc.test)
+      DependsOn: Deploytest
+
+  - template: deploy.yaml
+    parameters:
+      Environment: prod
+      ServiceConnection: $(sc.prod)
+      DependsOn: Deploystage
